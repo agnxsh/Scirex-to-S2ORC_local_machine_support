@@ -1,5 +1,5 @@
 # (Vijay): deduplicate this from my ScigraphIE repo using submodules
-# Updated by Agnish Ghosh, https://github/agnxsh
+# Updated by Agnish Ghosh, https://github.com/agnxsh
 from collections import defaultdict
 import gzip
 import json
