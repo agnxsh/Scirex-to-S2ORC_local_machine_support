@@ -212,10 +212,7 @@ def fetch_s2orc_keys_from_scirex_ids(scirex_doc_ids, data_download_commands):
             print(f"Took {end - start} seconds to process pdf parses")
             start = end
             #
-            if os.path.exists(output_path):
-                os.remove(output_path)
-            print(f"Deleted {output_path}")
-            print("\n")
+
         pickle.dump(s2orc_hash_to_struct_mapping, open(
             "s2orc_hash_to_struct_mapping.pkl", 'wb'))
     return s2orc_hash_to_struct_mapping
@@ -383,10 +380,6 @@ def fetch_s2orc_meta_rows_from_scirex_ids(scirex_document_metadata, metadata_dow
             end = time.perf_counter()
             print(f"Took {end - start} seconds to process pdf parses")
 
-            if os.path.exists(output_path):
-                os.remove(output_path)
-            print(f"Deleted {output_path}")
-            print("\n")
             if num_shards_to_use != None and i + 1 >= num_shards_to_use:
                 break
         print(
@@ -467,10 +460,6 @@ def create_citation_graph_from_seed_nodes(seed_node_ids, metadata_download_comma
                 print(
                     f"Took {end - start} seconds to add nodes for shard {shard_id}")
 
-                if os.path.exists(output_path):
-                    os.remove(output_path)
-                print(f"Deleted {output_path}")
-                print("\n")
                 if num_shards_to_use != None and i + 1 >= num_shards_to_use:
                     break
 
@@ -530,9 +519,6 @@ def construct_neighbor_text(seed_node_ids, metadata_download_commands, full_text
                     doc_idx_mapping[paper_id] = len(doc_idx_mapping)
                     all_neighbors.remove(paper_id)
 
-            if os.path.exists(output_path):
-                os.remove(output_path)
-            print(f"Deleted {output_path}")
             print("\n")
             if num_shards_to_use != None and i + 1 >= num_shards_to_use:
                 break
