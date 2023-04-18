@@ -5,16 +5,19 @@ import gzip
 import json
 import jsonlines
 import os
+import json
 import pickle
 import random
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import time
 import wget  # pip install wget
 import utils
 
-full_data_download_script = "full_data_downloads.sh"
+full_data_download_script = "/home/agnish/work/sci_s2orc/full_data_downloads.sh"
 metadata_download_script = "metadata_downloads.sh"
-caches_directory = "s2orc_caches"
+caches_directory = "/home/agnish/work/sci_s2orc/s2orc_caches/"
 
 # '''
 # S2ORC information must be accessed in batches, only fetching what you need at each time (due to its massive size).
@@ -63,7 +66,7 @@ class S2Metadata:
         return str({"doc_id": str(self.doc_id),
                     "doc_hash": str(self.doc_hash),
                     "title": str(self.title),
-                    "doi": str(self.doi),
+                    "date": str(self.doi),
                     "arxivId": str(self.arxivId),
                     "url": str(self.url)})
 
@@ -136,13 +139,13 @@ def get_semantic_scholar_metadata(scirex_ids, scirex_s2orc_mappings, overwrite_c
             else:
                 api_url = f"https://api.semanticscholar.org/v1/paper/{scirex_id}"
 
-            r = requests.get(api_url)
+            r = requests.get(api_url, verify=False)
             if r.status_code == 429:
                 # Sleep 100 seconds and retry, in case we've hit the service rate limiter
                 while True:
                     print("Too many requests error!")
                     time.Sleep(100)
-                    r = requests.get(api_url)
+                    r = requests.get(api_url, verify=True)
                     if r.status_code != 429:
                         break
             #
@@ -218,7 +221,20 @@ def fetch_s2orc_keys_from_scirex_ids(scirex_doc_ids, data_download_commands):
     return s2orc_hash_to_struct_mapping
 
 
+def run_through_pwc(scirex_metadata, s2orc_doc):
+    list1 = []
+    f = open("")
+    list1 = json.load(f)
+    f.close()
+    if scirex_metadata.arxivId != None and scirex_metadata.arxivId != "":
+        if scirex_metadata.arxivId == s2orc_doc["arxiv_id"]:
+            for i in list1:
+                if (i["date"].split("-")[0] == s2orc_doc["arxiv_id"]):
+                    return i["date"].split("-")[0]
+
+
 def s2orc_document_matches_s2_metadata(s2orc_doc, scirex_metadata, scirex_id):
+
     if scirex_metadata.doc_id != None and scirex_metadata.doc_id != "":
         # TODO: un-comment this code, if there's an indication that the S2ORC data schema !=
         # consistently typed
@@ -264,11 +280,11 @@ def load_metadata_into_dicts(scirex_documents_metadata):
     doi_dict = {}
     arxiv_id_dict = {}
     title_dict = {}
+    date_used = {}
 
     for scirex_id, doc_meta in scirex_documents_metadata.items():
         if scirex_id is None:
             continue
-
         if doc_meta.doc_id != None and doc_meta.doc_id != "":
             doc_id_dict[doc_meta.doc_id] = scirex_id
         if doc_meta.doi != None and doc_meta.doi != "":
